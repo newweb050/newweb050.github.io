@@ -492,7 +492,7 @@ section {
 
 .services-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 
@@ -540,7 +540,7 @@ section {
    ============================================ */
 .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
     max-width: 900px;
     margin: 0 auto;
@@ -703,7 +703,7 @@ section {
 
 .portfolio-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
 }
 
@@ -880,7 +880,7 @@ section {
    ============================================ */
 .reviews-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
     margin-bottom: 4rem;
 }
@@ -1057,16 +1057,16 @@ section {
 }
 
 .contact-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: 3rem;
-    align-items: start;
+    display: flex;
+    justify-content: center;
 }
 
 .contact-info {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
+    width: 100%;
+    max-width: 900px;
 }
 
 .contact-card {
@@ -1259,10 +1259,6 @@ section {
         display: none;
     }
     
-    .contact-grid {
-        grid-template-columns: 1fr;
-    }
-    
     .footer-grid {
         grid-template-columns: 1fr 1fr;
     }
@@ -1284,23 +1280,45 @@ section {
         padding: 1.5rem;
         gap: 1rem;
         box-shadow: var(--shadow-md);
+        z-index: 999;
     }
     
     .nav-links.active {
         display: flex;
     }
     
+    .nav-links a {
+        padding: 0.75rem 0;
+        font-size: 1.1rem;
+        border-bottom: 1px solid var(--gray-100);
+    }
+    
+    .nav-links a:last-child {
+        border-bottom: none;
+    }
+    
     .mobile-menu-btn {
         display: block;
+        padding: 0.5rem;
     }
     
     .hero-cta {
         flex-direction: column;
+        width: 100%;
+    }
+    
+    .hero-cta .btn {
+        width: 100%;
     }
     
     .hero-stats {
-        flex-direction: column;
-        gap: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .hero-stats .stat {
+        flex: 1;
+        min-width: 100px;
     }
     
     .pricing-grid {
@@ -1348,6 +1366,14 @@ section {
     .review-form-container {
         padding: 1.5rem;
     }
+    
+    .contact-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1356,11 +1382,15 @@ section {
     }
     
     h1 {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
     
     h2 {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
+    }
+    
+    .section-header p {
+        font-size: 0.9rem;
     }
     
     .btn {
@@ -1368,12 +1398,52 @@ section {
         font-size: 0.875rem;
     }
     
+    .hero-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-stats {
+        gap: 0.75rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    
     .pricing-card {
         padding: 1.5rem;
     }
     
     .price {
-        font-size: 2.5rem;
+        font-size: 2.25rem;
+    }
+    
+    .service-card {
+        padding: 1.5rem;
+    }
+    
+    .portfolio-grid,
+    .reviews-grid,
+    .services-grid,
+    .pricing-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .review-card {
+        padding: 1.5rem;
     }
     
     .whatsapp-float {

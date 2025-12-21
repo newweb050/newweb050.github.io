@@ -1,5 +1,5 @@
 /* ============================================
-   WebCraft Studio - Main JavaScript
+   NewWeb050 - Main JavaScript
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -252,50 +252,6 @@ function getInitials(name) {
         .substring(0, 2);
 }
 
-function getSampleReviews() {
-    return [
-        {
-            name: "Rajesh Kumar",
-            business: "Kumar Electronics",
-            rating: 5,
-            message: "Excellent work! They delivered a beautiful website within 5 days. My customers can now easily find my shop and contact me directly. Highly recommended for small businesses."
-        },
-        {
-            name: "Priya Sharma",
-            business: "Priya's Beauty Salon",
-            rating: 5,
-            message: "Very professional team. The website looks modern and works perfectly on mobile. The QR code feature is great - customers just scan it at the counter!"
-        },
-        {
-            name: "Mohammed Ali",
-            business: "Ali's Biryani House",
-            rating: 4,
-            message: "Good service and reasonable price. The menu display feature helps my customers see all items with prices. Would definitely recommend to other restaurant owners."
-        }
-    ];
-}
-
-function getStoredReviews() {
-    try {
-        const stored = localStorage.getItem('webcraftstudio_reviews');
-        return stored ? JSON.parse(stored) : [];
-    } catch (e) {
-        return [];
-    }
-}
-
-function saveReview(review) {
-    try {
-        const reviews = getStoredReviews();
-        reviews.unshift(review);
-        localStorage.setItem('webcraftstudio_reviews', JSON.stringify(reviews));
-        return true;
-    } catch (e) {
-        console.error('Error saving review:', e);
-        return false;
-    }
-}
-
 /* ============================================
    Star Rating Input
    ============================================ */
@@ -349,12 +305,6 @@ function initForms() {
     if (reviewForm) {
         reviewForm.addEventListener('submit', handleReviewSubmit);
     }
-    
-    // Contact Form
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', handleContactSubmit);
-    }
 }
 
 async function handleReviewSubmit(e) {
@@ -403,38 +353,6 @@ async function handleReviewSubmit(e) {
         submitButton.disabled = false;
         submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
     }
-}
-
-function handleContactSubmit(e) {
-    e.preventDefault();
-    
-    const form = e.target;
-    const formData = new FormData(form);
-    
-    // Build WhatsApp message
-    const name = formData.get('name');
-    const phone = formData.get('phone');
-    const businessType = formData.get('business-type');
-    const plan = formData.get('plan');
-    const message = formData.get('message');
-    
-    const planName = plan === 'essential' ? 'Essential Website (₹3,500)' : 'Full Business Website (₹7,500)';
-    
-    let whatsappMessage = `Hi! I'm interested in getting a website for my business.\n\n`;
-    whatsappMessage += `*Name:* ${name}\n`;
-    whatsappMessage += `*Phone:* ${phone}\n`;
-    if (businessType) whatsappMessage += `*Business Type:* ${businessType}\n`;
-    whatsappMessage += `*Plan:* ${planName}\n`;
-    if (message) whatsappMessage += `\n*Details:*\n${message}`;
-    
-    // Get WhatsApp number from config or use default
-    const whatsappNumber = typeof CONFIG !== 'undefined' ? CONFIG.whatsappNumber : '919689724689';
-    
-    // Open WhatsApp
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-    window.open(whatsappUrl, '_blank');
-    
-    showToast('Opening WhatsApp...', 'success');
 }
 
 /* ============================================
