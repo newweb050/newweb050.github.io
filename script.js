@@ -152,26 +152,43 @@ function initReviews() {
     const reviewsGrid = document.getElementById('reviews-grid');
     if (!reviewsGrid) return;
     
-    // Load reviews from reviews.js or localStorage
-    let reviews = [];
-    
-    // First check for defined reviews in reviews.js
-    if (typeof REVIEWS !== 'undefined' && REVIEWS.length > 0) {
-        reviews = REVIEWS;
+    // Load reviews from Firebase if available
+    if (window.firebaseDB) {
+        loadFirebaseReviews();
+    } else {
+        // Firebase not ready yet, set up callback
+        window.loadFirebaseReviews = loadFirebaseReviews;
+        // Show sample reviews as fallback
+        renderReviews(getSampleReviews());
     }
-    
-    // Also check localStorage for submitted reviews
-    const storedReviews = getStoredReviews();
-    if (storedReviews.length > 0) {
-        reviews = [...reviews, ...storedReviews];
+}
+
+async function loadFirebaseReviews() {
+    try {
+        const { collection, getDocs, query, orderBy, limit } = window.firestoreFunctions;
+        const db = window.firebaseDB;
+        
+        // Query reviews collection, ordered by date, limit to 20
+        const reviewsRef = collection(db, 'reviews');
+        const q = query(reviewsRef, orderBy('date', 'desc'), limit(20));
+        const querySnapshot = await getDocs(q);
+        
+        const reviews = [];
+        querySnapshot.forEach((doc) => {
+            reviews.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // If no reviews in Firebase, show sample reviews
+        if (reviews.length === 0) {
+            reviews.push(...getSampleReviews());
+        }
+        
+        renderReviews(reviews);
+    } catch (error) {
+        console.error('Error loading reviews from Firebase:', error);
+        // Fallback to sample reviews
+        renderReviews(getSampleReviews());
     }
-    
-    // If still no reviews, show sample reviews
-    if (reviews.length === 0) {
-        reviews = getSampleReviews();
-    }
-    
-    renderReviews(reviews);
 }
 
 function renderReviews(reviews) {
@@ -320,33 +337,51 @@ function initForms() {
     }
 }
 
-function handleReviewSubmit(e) {
+async function handleReviewSubmit(e) {
     e.preventDefault();
     
     const form = e.target;
     const formData = new FormData(form);
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    // Disable button during submission
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
     
     const review = {
         name: formData.get('name'),
         business: formData.get('business'),
-        website: formData.get('website'),
+        website: formData.get('website') || '',
         rating: parseInt(formData.get('rating')),
-        message: formData.get('message'),
-        date: new Date().toISOString()
+        message: formData.get('message')
     };
     
-    // Save to localStorage (for demo purposes)
-    // In production, you'd send this to a backend or use a service like Formspree
-    if (saveReview(review)) {
-        showToast('Thank you for your review! It will appear on the page.', 'success');
+    try {
+        // Save to Firebase Firestore
+        const { collection, addDoc, serverTimestamp } = window.firestoreFunctions;
+        const db = window.firebaseDB;
+        
+        await addDoc(collection(db, 'reviews'), {
+            ...review,
+            date: serverTimestamp(),
+            approved: true // Auto-approve for now, you can manually moderate later
+        });
+        
+        showToast('Thank you for your review! It will appear shortly.', 'success');
         form.reset();
         document.getElementById('rating-value').value = 5;
         initStarRating();
         
-        // Re-render reviews
-        initReviews();
-    } else {
+        // Reload reviews
+        setTimeout(() => loadFirebaseReviews(), 1000);
+        
+    } catch (error) {
+        console.error('Error submitting review:', error);
         showToast('There was an error submitting your review. Please try again.', 'error');
+    } finally {
+        // Re-enable button
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
     }
 }
 

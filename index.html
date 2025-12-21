@@ -460,6 +460,36 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAH-PfnbcmpMi0gXgB_30ysciV7C3jid4",
+            authDomain: "newweb050-portfolio.firebaseapp.com",
+            projectId: "newweb050-portfolio",
+            storageBucket: "newweb050-portfolio.firebasestorage.app",
+            messagingSenderId: "495666004746",
+            appId: "1:495666004746:web:30c7571ecd71597e9c30f3"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make db available globally
+        window.firebaseDB = db;
+        window.firestoreFunctions = { collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp };
+        
+        // Trigger review loading after Firebase is ready
+        if (window.loadFirebaseReviews) {
+            window.loadFirebaseReviews();
+        }
+    </script>
+
     <!-- Scripts -->
     <script src="reviews.js"></script>
     <script src="script.js"></script>
