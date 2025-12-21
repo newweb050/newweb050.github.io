@@ -70,29 +70,52 @@ function initNavigation() {
 }
 
 /* ============================================
-   Portfolio - Fetch from GitHub
+   Portfolio - Fetch ONLY from GitHub
    ============================================ */
 async function initPortfolio() {
     const portfolioGrid = document.getElementById('portfolio-grid');
     if (!portfolioGrid) return;
     
-    // Fetch repos directly from GitHub
-    try {
-        const repos = await fetchGitHubProjects();
-        if (repos && repos.length > 0) {
-            renderPortfolioFromGitHub(repos);
-        } else {
-            // No repos yet - show message
-            portfolioGrid.innerHTML = `
-                <div class="no-projects">
-                    <i class="fas fa-rocket"></i>
-                    <h3>Coming Soon!</h3>
-                    <p>Our client projects will appear here soon.</p>
+    // Show loading state
+    portfolioGrid.innerHTML = '<div class="loading-skeleton"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>';
+    
+    // Fetch repos from GitHub
+    const repos = await fetchGitHubProjects();
+    
+    // Clear loading state
+    portfolioGrid.innerHTML = '';
+    
+    if (repos.length > 0) {
+        // Render each repo as a portfolio card
+        repos.forEach(repo => {
+            const hostedUrl = `https://newweb050.github.io/${repo.name}/`;
+            const card = document.createElement('div');
+            card.className = 'portfolio-card';
+            
+            const repoName = repo.name.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const description = repo.description || 'Professional business website';
+            const language = repo.language || 'Website';
+            
+            card.innerHTML = `
+                <div class="portfolio-image">
+                    <div class="placeholder"><i class="fas fa-globe"></i></div>
+                    <div class="portfolio-overlay">
+                        <a href="${hostedUrl}" target="_blank" title="Visit Website"><i class="fas fa-external-link-alt"></i></a>
+                    </div>
+                </div>
+                <div class="portfolio-content">
+                    <h3>${repoName}</h3>
+                    <p>${description}</p>
+                    <div class="portfolio-tags">
+                        <span class="portfolio-tag">${language}</span>
+                    </div>
                 </div>
             `;
-        }
-    } catch (error) {
-        console.error('Error fetching portfolio:', error);
+            
+            portfolioGrid.appendChild(card);
+        });
+    } else {
+        // No repos found
         portfolioGrid.innerHTML = `
             <div class="no-projects">
                 <i class="fas fa-rocket"></i>
@@ -104,108 +127,22 @@ async function initPortfolio() {
 }
 
 async function fetchGitHubProjects() {
-    // GitHub username - hardcoded for newweb050
-    const githubUsername = 'newweb050';
-    
     try {
-        // Fetch repos from GitHub API
-        const response = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=pushed&per_page=30`);
-        
-        if (!response.ok) {
-            console.error('GitHub API response not ok:', response.status);
-            throw new Error('Failed to fetch');
-        }
+        const response = await fetch('https://api.github.com/users/newweb050/repos?sort=pushed&per_page=30');
+        if (!response.ok) return [];
         
         const repos = await response.json();
-        console.log('Fetched repos:', repos.length);
         
-        // Filter out the main .github.io repo and forks, keep only original client websites
-        const clientRepos = repos.filter(repo => {
-            // Exclude the main portfolio repo
-            if (repo.name === 'newweb050.github.io') return false;
-            // Exclude forked repos
-            if (repo.fork) return false;
-            // Exclude repos that are likely not client websites
-            if (repo.name.startsWith('.')) return false;
-            return true;
-        });
-        
-        console.log('Client repos after filter:', clientRepos.length);
-        
-        // Return up to 6 most recent client repos
-        return clientRepos.slice(0, 6);
+        // Filter: exclude portfolio repo, forks, and hidden repos
+        return repos.filter(repo => 
+            repo.name !== 'newweb050.github.io' && 
+            !repo.fork && 
+            !repo.name.startsWith('.')
+        ).slice(0, 6);
     } catch (error) {
-        console.error('GitHub API error:', error);
+        console.error('GitHub fetch error:', error);
         return [];
     }
-}
-
-function createPortfolioCard(client) {
-    const card = document.createElement('div');
-    card.className = 'portfolio-card';
-    
-    const tags = client.tags || ['Website'];
-    const tagsHTML = tags.map(tag => `<span class="portfolio-tag">${tag}</span>`).join('');
-    
-    card.innerHTML = `
-        <div class="portfolio-image">
-            ${client.image 
-                ? `<img src="${client.image}" alt="${client.name}" loading="lazy">`
-                : `<div class="placeholder"><i class="fas fa-globe"></i></div>`
-            }
-            <div class="portfolio-overlay">
-                ${client.liveUrl ? `<a href="${client.liveUrl}" target="_blank" title="Visit Website"><i class="fas fa-external-link-alt"></i></a>` : ''}
-            </div>
-        </div>
-        <div class="portfolio-content">
-            <h3>${client.name}</h3>
-            <p>${client.description || 'Professional business website'}</p>
-            <div class="portfolio-tags">
-                ${tagsHTML}
-            </div>
-        </div>
-    `;
-    
-    return card;
-}
-
-function renderPortfolioFromGitHub(repos) {
-    const portfolioGrid = document.getElementById('portfolio-grid');
-    portfolioGrid.innerHTML = '';
-    
-    console.log('Rendering repos:', repos);
-    
-    repos.forEach(repo => {
-        // Use GitHub Pages hosted URL: newweb050.github.io/repo-name/
-        const hostedUrl = `https://newweb050.github.io/${repo.name}/`;
-        
-        const client = {
-            name: formatRepoName(repo.name),
-            description: repo.description || 'Professional business website',
-            liveUrl: hostedUrl,
-            tags: getRepoTags(repo)
-        };
-        
-        const card = createPortfolioCard(client);
-        portfolioGrid.appendChild(card);
-    });
-}
-
-function formatRepoName(name) {
-    return name
-        .replace(/-/g, ' ')
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, l => l.toUpperCase());
-}
-
-function getRepoTags(repo) {
-    const tags = [];
-    if (repo.language) tags.push(repo.language);
-    if (repo.topics && repo.topics.length > 0) {
-        tags.push(...repo.topics.slice(0, 2));
-    }
-    if (tags.length === 0) tags.push('Website');
-    return tags;
 }
 
 /* ============================================
