@@ -165,12 +165,12 @@ function initReviews() {
 
 async function loadFirebaseReviews() {
     try {
-        const { collection, getDocs, query, orderBy, limit } = window.firestoreFunctions;
+        const { collection, getDocs, query, orderBy, limit, where } = window.firestoreFunctions;
         const db = window.firebaseDB;
         
-        // Query reviews collection, ordered by date, limit to 20
+        // Query only APPROVED reviews, ordered by date, limit to 20
         const reviewsRef = collection(db, 'reviews');
-        const q = query(reviewsRef, orderBy('date', 'desc'), limit(20));
+        const q = query(reviewsRef, where('approved', '==', true), orderBy('date', 'desc'), limit(20));
         const querySnapshot = await getDocs(q);
         
         const reviews = [];
@@ -364,10 +364,10 @@ async function handleReviewSubmit(e) {
         await addDoc(collection(db, 'reviews'), {
             ...review,
             date: serverTimestamp(),
-            approved: true // Auto-approve for now, you can manually moderate later
+            approved: false // Requires manual approval in Firebase Console
         });
         
-        showToast('Thank you for your review! It will appear shortly.', 'success');
+        showToast('Thank you for your review! It will appear after approval.', 'success');
         form.reset();
         document.getElementById('rating-value').value = 5;
         initStarRating();
