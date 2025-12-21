@@ -94,11 +94,14 @@ async function initPortfolio() {
             
             const repoName = repo.name.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             const description = repo.description || 'Professional business website';
-            const language = repo.language || 'Website';
+            
+            // Screenshot URL using a screenshot service
+            const screenshotUrl = `https://image.thum.io/get/width/600/crop/400/${hostedUrl}`;
             
             card.innerHTML = `
                 <div class="portfolio-image">
-                    <div class="placeholder"><i class="fas fa-globe"></i></div>
+                    <img src="${screenshotUrl}" alt="${repoName}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder" style="display:none;"><i class="fas fa-globe"></i></div>
                     <div class="portfolio-overlay">
                         <a href="${hostedUrl}" target="_blank" title="Visit Website"><i class="fas fa-external-link-alt"></i></a>
                     </div>
@@ -106,9 +109,6 @@ async function initPortfolio() {
                 <div class="portfolio-content">
                     <h3>${repoName}</h3>
                     <p>${description}</p>
-                    <div class="portfolio-tags">
-                        <span class="portfolio-tag">${language}</span>
-                    </div>
                 </div>
             `;
             
