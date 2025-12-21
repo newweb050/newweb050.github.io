@@ -158,8 +158,8 @@ function initReviews() {
     } else {
         // Firebase not ready yet, set up callback
         window.loadFirebaseReviews = loadFirebaseReviews;
-        // Show sample reviews as fallback
-        renderReviews(getSampleReviews());
+        // Show loading state
+        reviewsGrid.innerHTML = '<div class="loading-skeleton"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>';
     }
 }
 
@@ -178,16 +178,18 @@ async function loadFirebaseReviews() {
             reviews.push({ id: doc.id, ...doc.data() });
         });
         
-        // If no reviews in Firebase, show sample reviews
+        // Show message if no approved reviews yet
         if (reviews.length === 0) {
-            reviews.push(...getSampleReviews());
+            const reviewsGrid = document.getElementById('reviews-grid');
+            reviewsGrid.innerHTML = '<div class="no-reviews"><p>No reviews yet. Be the first to share your experience!</p></div>';
+            return;
         }
         
         renderReviews(reviews);
     } catch (error) {
         console.error('Error loading reviews from Firebase:', error);
-        // Fallback to sample reviews
-        renderReviews(getSampleReviews());
+        const reviewsGrid = document.getElementById('reviews-grid');
+        reviewsGrid.innerHTML = '<div class="no-reviews"><p>Unable to load reviews. Please try again later.</p></div>';
     }
 }
 

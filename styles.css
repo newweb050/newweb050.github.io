@@ -864,6 +864,17 @@ section {
     color: var(--gray-500);
 }
 
+.no-reviews {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    color: var(--gray-600);
+    font-size: 1.1rem;
+}
+
 /* ============================================
    Reviews Section
    ============================================ */
