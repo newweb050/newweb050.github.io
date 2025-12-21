@@ -928,6 +928,22 @@ section {
     font-size: 0.875rem;
 }
 
+.review-website {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.review-website:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+.review-website i {
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+}
+
 .review-stars {
     color: var(--accent);
     margin-bottom: 1rem;

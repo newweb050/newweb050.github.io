@@ -168,6 +168,15 @@ async function loadFirebaseReviews() {
         const { collection, getDocs, query, orderBy, limit, where } = window.firestoreFunctions;
         const db = window.firebaseDB;
         
+        if (!db) {
+            console.error('Firebase DB not initialized');
+            const reviewsGrid = document.getElementById('reviews-grid');
+            reviewsGrid.innerHTML = '<div class="no-reviews"><p>Loading reviews...</p></div>';
+            return;
+        }
+        
+        console.log('Fetching reviews from Firebase...');
+        
         // Query only APPROVED reviews, ordered by date, limit to 20
         const reviewsRef = collection(db, 'reviews');
         const q = query(reviewsRef, where('approved', '==', true), orderBy('date', 'desc'), limit(20));
@@ -177,6 +186,8 @@ async function loadFirebaseReviews() {
         querySnapshot.forEach((doc) => {
             reviews.push({ id: doc.id, ...doc.data() });
         });
+        
+        console.log(`Loaded ${reviews.length} approved reviews from Firebase`);
         
         // Show message if no approved reviews yet
         if (reviews.length === 0) {
@@ -188,8 +199,9 @@ async function loadFirebaseReviews() {
         renderReviews(reviews);
     } catch (error) {
         console.error('Error loading reviews from Firebase:', error);
+        console.error('Error details:', error.message, error.code);
         const reviewsGrid = document.getElementById('reviews-grid');
-        reviewsGrid.innerHTML = '<div class="no-reviews"><p>Unable to load reviews. Please try again later.</p></div>';
+        reviewsGrid.innerHTML = '<div class="no-reviews"><p>Unable to load reviews. Please refresh the page.</p></div>';
     }
 }
 
@@ -210,12 +222,18 @@ function createReviewCard(review) {
     const initials = getInitials(review.name);
     const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
     
+    // Build business info with optional website link
+    let businessInfo = review.business;
+    if (review.website && review.website.trim() !== '') {
+        businessInfo = `<a href="${review.website}" target="_blank" rel="noopener noreferrer" class="review-website">${review.business} <i class="fas fa-external-link-alt"></i></a>`;
+    }
+    
     card.innerHTML = `
         <div class="review-header">
             <div class="review-avatar">${initials}</div>
             <div class="review-info">
                 <h4>${review.name}</h4>
-                <p>${review.business}</p>
+                <p>${businessInfo}</p>
             </div>
         </div>
         <div class="review-stars">${stars}</div>
