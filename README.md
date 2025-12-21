@@ -1,4 +1,4 @@
-# WebCraft Studio - Portfolio Website
+# NewWeb050 - Portfolio Website
 
 A professional portfolio website for your freelance web development business. Built with pure HTML, CSS, and JavaScript - ready to deploy on GitHub Pages.
 
@@ -32,11 +32,11 @@ Open `clients.js` and update the `CONFIG` object:
 
 ```javascript
 const CONFIG = {
-    githubUsername: "your-actual-github-username",
+    githubUsername: "newweb050",
     whatsappNumber: "919876543210",  // Your WhatsApp number
-    email: "your-email@example.com",
+    email: "newweb050@gmail.com",
     phone: "+91 98765 43210",
-    businessName: "Your Business Name"
+    businessName: "NewWeb050"
 };
 ```
 
@@ -44,7 +44,7 @@ const CONFIG = {
 
 Open `index.html` and search for these placeholders to update:
 - WhatsApp number: `919876543210`
-- Email: `hello@webcraftstudio.com`
+- Email: `newweb050@gmail.com`
 - Phone: `+91 98765 43210`
 
 ### 3. Add Your Client Projects
@@ -138,7 +138,7 @@ In `index.html`, find and update:
 ```html
 <a href="#" class="logo">
     <i class="fas fa-code"></i>
-    <span>Your Brand Name</span>
+    <span>NewWeb050</span>
 </a>
 ```
 

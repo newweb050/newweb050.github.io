@@ -76,48 +76,68 @@ async function initPortfolio() {
     const portfolioGrid = document.getElementById('portfolio-grid');
     if (!portfolioGrid) return;
     
-    // First try to load from clients.js
-    if (typeof CLIENTS !== 'undefined' && CLIENTS.length > 0) {
-        renderPortfolio(CLIENTS);
-        return;
-    }
-    
-    // If no clients defined, try fetching from GitHub
+    // Fetch repos directly from GitHub
     try {
         const repos = await fetchGitHubProjects();
         if (repos && repos.length > 0) {
             renderPortfolioFromGitHub(repos);
         } else {
-            renderEmptyPortfolio();
+            // No repos yet - show message
+            portfolioGrid.innerHTML = `
+                <div class="no-projects">
+                    <i class="fas fa-rocket"></i>
+                    <h3>Coming Soon!</h3>
+                    <p>Our client projects will appear here soon.</p>
+                </div>
+            `;
         }
     } catch (error) {
         console.error('Error fetching portfolio:', error);
-        renderEmptyPortfolio();
+        portfolioGrid.innerHTML = `
+            <div class="no-projects">
+                <i class="fas fa-rocket"></i>
+                <h3>Coming Soon!</h3>
+                <p>Our client projects will appear here soon.</p>
+            </div>
+        `;
     }
 }
 
 async function fetchGitHubProjects() {
-    // Get GitHub username from config
-    const githubUsername = typeof CONFIG !== 'undefined' ? CONFIG.githubUsername : 'your-github-username';
+    // GitHub username - hardcoded for newweb050
+    const githubUsername = 'newweb050';
     
     try {
-        const response = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=updated&per_page=6`);
-        if (!response.ok) throw new Error('Failed to fetch');
-        return await response.json();
+        // Fetch repos from GitHub API
+        const response = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=pushed&per_page=30`);
+        
+        if (!response.ok) {
+            console.error('GitHub API response not ok:', response.status);
+            throw new Error('Failed to fetch');
+        }
+        
+        const repos = await response.json();
+        console.log('Fetched repos:', repos.length);
+        
+        // Filter out the main .github.io repo and forks, keep only original client websites
+        const clientRepos = repos.filter(repo => {
+            // Exclude the main portfolio repo
+            if (repo.name === 'newweb050.github.io') return false;
+            // Exclude forked repos
+            if (repo.fork) return false;
+            // Exclude repos that are likely not client websites
+            if (repo.name.startsWith('.')) return false;
+            return true;
+        });
+        
+        console.log('Client repos after filter:', clientRepos.length);
+        
+        // Return up to 6 most recent client repos
+        return clientRepos.slice(0, 6);
     } catch (error) {
         console.error('GitHub API error:', error);
         return [];
     }
-}
-
-function renderPortfolio(clients) {
-    const portfolioGrid = document.getElementById('portfolio-grid');
-    portfolioGrid.innerHTML = '';
-    
-    clients.forEach(client => {
-        const card = createPortfolioCard(client);
-        portfolioGrid.appendChild(card);
-    });
 }
 
 function createPortfolioCard(client) {
@@ -135,7 +155,6 @@ function createPortfolioCard(client) {
             }
             <div class="portfolio-overlay">
                 ${client.liveUrl ? `<a href="${client.liveUrl}" target="_blank" title="Visit Website"><i class="fas fa-external-link-alt"></i></a>` : ''}
-                ${client.githubUrl ? `<a href="${client.githubUrl}" target="_blank" title="View Code"><i class="fab fa-github"></i></a>` : ''}
             </div>
         </div>
         <div class="portfolio-content">
@@ -154,12 +173,16 @@ function renderPortfolioFromGitHub(repos) {
     const portfolioGrid = document.getElementById('portfolio-grid');
     portfolioGrid.innerHTML = '';
     
+    console.log('Rendering repos:', repos);
+    
     repos.forEach(repo => {
+        // Use GitHub Pages hosted URL: newweb050.github.io/repo-name/
+        const hostedUrl = `https://newweb050.github.io/${repo.name}/`;
+        
         const client = {
             name: formatRepoName(repo.name),
-            description: repo.description || 'Client website project',
-            liveUrl: repo.homepage || null,
-            githubUrl: repo.html_url,
+            description: repo.description || 'Professional business website',
+            liveUrl: hostedUrl,
             tags: getRepoTags(repo)
         };
         
@@ -183,51 +206,6 @@ function getRepoTags(repo) {
     }
     if (tags.length === 0) tags.push('Website');
     return tags;
-}
-
-function renderEmptyPortfolio() {
-    const portfolioGrid = document.getElementById('portfolio-grid');
-    portfolioGrid.innerHTML = `
-        <div class="portfolio-card">
-            <div class="portfolio-image">
-                <div class="placeholder"><i class="fas fa-utensils"></i></div>
-            </div>
-            <div class="portfolio-content">
-                <h3>Sample Restaurant</h3>
-                <p>Full business website with menu and gallery</p>
-                <div class="portfolio-tags">
-                    <span class="portfolio-tag">Restaurant</span>
-                    <span class="portfolio-tag">Full Website</span>
-                </div>
-            </div>
-        </div>
-        <div class="portfolio-card">
-            <div class="portfolio-image">
-                <div class="placeholder"><i class="fas fa-cut"></i></div>
-            </div>
-            <div class="portfolio-content">
-                <h3>Sample Salon</h3>
-                <p>Essential website with contact buttons</p>
-                <div class="portfolio-tags">
-                    <span class="portfolio-tag">Salon</span>
-                    <span class="portfolio-tag">Essential</span>
-                </div>
-            </div>
-        </div>
-        <div class="portfolio-card">
-            <div class="portfolio-image">
-                <div class="placeholder"><i class="fas fa-store"></i></div>
-            </div>
-            <div class="portfolio-content">
-                <h3>Sample Store</h3>
-                <p>Business website with product showcase</p>
-                <div class="portfolio-tags">
-                    <span class="portfolio-tag">Retail</span>
-                    <span class="portfolio-tag">Full Website</span>
-                </div>
-            </div>
-        </div>
-    `;
 }
 
 /* ============================================

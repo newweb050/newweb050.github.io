@@ -839,6 +839,31 @@ section {
     margin-bottom: 1rem;
 }
 
+/* No Projects State */
+.no-projects {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+}
+
+.no-projects i {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.no-projects h3 {
+    margin-bottom: 0.5rem;
+    color: var(--gray-800);
+}
+
+.no-projects p {
+    color: var(--gray-500);
+}
+
 /* ============================================
    Reviews Section
    ============================================ */
