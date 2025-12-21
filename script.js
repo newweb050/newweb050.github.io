@@ -408,7 +408,7 @@ function handleContactSubmit(e) {
     if (message) whatsappMessage += `\n*Details:*\n${message}`;
     
     // Get WhatsApp number from config or use default
-    const whatsappNumber = typeof CONFIG !== 'undefined' ? CONFIG.whatsappNumber : '919876543210';
+    const whatsappNumber = typeof CONFIG !== 'undefined' ? CONFIG.whatsappNumber : '919689724689';
     
     // Open WhatsApp
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
