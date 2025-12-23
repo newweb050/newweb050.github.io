@@ -79,7 +79,7 @@ async function initPortfolio() {
     // Show loading state
     portfolioGrid.innerHTML = '<div class="loading-skeleton"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>';
     
-    // Fetch repos from GitHub
+    // Fetch repos from both GitHub accounts
     const repos = await fetchGitHubProjects();
     
     // Clear loading state
@@ -88,7 +88,6 @@ async function initPortfolio() {
     if (repos.length > 0) {
         // Render each repo as a portfolio card
         repos.forEach(repo => {
-            const hostedUrl = `https://newweb050.github.io/${repo.name}/`;
             const card = document.createElement('div');
             card.className = 'portfolio-card';
             
@@ -96,14 +95,14 @@ async function initPortfolio() {
             const description = repo.description || 'Professional business website';
             
             // Screenshot URL using a screenshot service
-            const screenshotUrl = `https://image.thum.io/get/width/600/crop/400/${hostedUrl}`;
+            const screenshotUrl = `https://image.thum.io/get/width/600/crop/400/${repo.hostedUrl}`;
             
             card.innerHTML = `
                 <div class="portfolio-image">
                     <img src="${screenshotUrl}" alt="${repoName}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="placeholder" style="display:none;"><i class="fas fa-globe"></i></div>
                     <div class="portfolio-overlay">
-                        <a href="${hostedUrl}" target="_blank" title="Visit Website"><i class="fas fa-external-link-alt"></i></a>
+                        <a href="${repo.hostedUrl}" target="_blank" title="Visit Website"><i class="fas fa-external-link-alt"></i></a>
                     </div>
                 </div>
                 <div class="portfolio-content">
@@ -128,17 +127,39 @@ async function initPortfolio() {
 
 async function fetchGitHubProjects() {
     try {
+        // Fetch from newweb050 GitHub account
         const response = await fetch('https://api.github.com/users/newweb050/repos?sort=pushed&per_page=30');
-        if (!response.ok) return [];
         
-        const repos = await response.json();
+        const repos = response.ok ? await response.json() : [];
         
-        // Filter: exclude portfolio repo, forks, and hidden repos
-        return repos.filter(repo => 
-            repo.name !== 'newweb050.github.io' && 
-            !repo.fork && 
-            !repo.name.startsWith('.')
-        ).slice(0, 6);
+        // Filter and process repos from newweb050
+        const filteredRepos = repos
+            .filter(repo => 
+                repo.name !== 'newweb050.github.io' && 
+                !repo.fork && 
+                !repo.name.startsWith('.')
+            )
+            .map(repo => ({
+                ...repo,
+                hostedUrl: `https://newweb050.github.io/${repo.name}/`,
+                owner: 'newweb050'
+            }));
+        
+        // Add the buggymaytricks.github.io project manually
+        const buggyMayTricksProject = {
+            name: 'BuggyMayTricks',
+            description: 'Professional portfolio and showcase website',
+            hostedUrl: 'https://buggymaytricks.github.io/',
+            pushed_at: new Date().toISOString(),
+            owner: 'buggymaytricks'
+        };
+        
+        // Combine and sort by updated date
+        const allRepos = [buggyMayTricksProject, ...filteredRepos]
+            .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
+            .slice(0, 9); // Show up to 9 projects
+        
+        return allRepos;
     } catch (error) {
         console.error('GitHub fetch error:', error);
         return [];
